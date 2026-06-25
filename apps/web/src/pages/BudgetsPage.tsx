@@ -1,28 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import type { BudgetResponseDto, CategoryResponseDto } from "@fincontrol/types";
+import { EmptyState } from "../components/shared/EmptyState.js";
 import { Modal } from "../components/shared/Modal.js";
+import { MonthYearPicker } from "../components/shared/MonthYearPicker.js";
+import { ProgressBar } from "../components/shared/ProgressBar.js";
 import { getIconEmoji } from "./CategoriesPage.js";
 import * as categoryService from "../services/category.service.js";
 import * as budgetService from "../services/budget.service.js";
 
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function ProgressBar({ percentage }: { percentage: number }) {
-  const clamped = Math.min(percentage, 100);
-  const color =
-    percentage > 100 ? "bg-red-500" : percentage >= 80 ? "bg-yellow-400" : "bg-green-500";
-
-  return (
-    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-      <div
-        className={`h-full rounded-full transition-all ${color}`}
-        style={{ width: `${clamped}%` }}
-      />
-    </div>
-  );
 }
 
 interface BudgetFormProps {
@@ -101,11 +90,21 @@ function BudgetForm({
   );
 }
 
+function DonutCenter({ percentage }: { percentage: number }) {
+  const color =
+    percentage > 100 ? "text-red-600" : percentage >= 80 ? "text-yellow-600" : "text-green-600";
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+      <span className={`text-xl font-bold ${color}`}>{percentage.toFixed(0)}%</span>
+      <span className="text-xs text-gray-500">gasto</span>
+    </div>
+  );
+}
+
 export function BudgetsPage() {
   const qc = useQueryClient();
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
+  const [period, setPeriod] = useState({ month: now.getMonth() + 1, year: now.getFullYear() });
   const [showCreate, setShowCreate] = useState(false);
   const [editing, setEditing] = useState<BudgetResponseDto | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<BudgetResponseDto | null>(null);
@@ -117,15 +116,31 @@ export function BudgetsPage() {
   });
 
   const { data: budgets = [], isLoading } = useQuery({
-    queryKey: ["budgets", month, year],
-    queryFn: () => budgetService.getBudgets(month, year),
+    queryKey: ["budgets", period.month, period.year],
+    queryFn: () => budgetService.getBudgets(period.month, period.year),
   });
+
+  const sortedBudgets = [...budgets].sort((a, b) => b.percentage - a.percentage);
+
+  const totalBudgeted = budgets.reduce((sum, b) => sum + Number(b.amount), 0);
+  const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
+  const overallPercentage = totalBudgeted > 0 ? (totalSpent / totalBudgeted) * 100 : 0;
+  const remaining = Math.max(totalBudgeted - totalSpent, 0);
+
+  const donutData =
+    totalBudgeted > 0
+      ? [
+          { name: "Gasto", value: Math.min(totalSpent, totalBudgeted), fill: "#ef4444" },
+          { name: "Disponível", value: remaining, fill: "#22c55e" },
+        ]
+      : [{ name: "Sem orçamento", value: 1, fill: "#e5e7eb" }];
 
   const upsertMutation = useMutation({
     mutationFn: ({ categoryId, amount }: { categoryId: string; amount: number }) =>
-      budgetService.upsertBudget({ categoryId, amount, month, year }),
+      budgetService.upsertBudget({ categoryId, amount, month: period.month, year: period.year }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["budgets", month, year] });
+      qc.invalidateQueries({ queryKey: ["budgets", period.month, period.year] });
+      qc.invalidateQueries({ queryKey: ["dashboard-charts"] });
       setShowCreate(false);
       setEditing(null);
       setFormError(null);
@@ -136,44 +151,12 @@ export function BudgetsPage() {
   const deleteMutation = useMutation({
     mutationFn: budgetService.deleteBudget,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["budgets", month, year] });
+      qc.invalidateQueries({ queryKey: ["budgets", period.month, period.year] });
+      qc.invalidateQueries({ queryKey: ["dashboard-charts"] });
       setDeleteTarget(null);
     },
     onError: () => alert("Erro ao excluir orçamento."),
   });
-
-  const MONTHS = [
-    "Janeiro",
-    "Fevereiro",
-    "Março",
-    "Abril",
-    "Maio",
-    "Junho",
-    "Julho",
-    "Agosto",
-    "Setembro",
-    "Outubro",
-    "Novembro",
-    "Dezembro",
-  ];
-
-  function prevMonth() {
-    if (month === 1) {
-      setMonth(12);
-      setYear((y) => y - 1);
-    } else {
-      setMonth((m) => m - 1);
-    }
-  }
-
-  function nextMonth() {
-    if (month === 12) {
-      setMonth(1);
-      setYear((y) => y + 1);
-    } else {
-      setMonth((m) => m + 1);
-    }
-  }
 
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
@@ -191,80 +174,120 @@ export function BudgetsPage() {
       </div>
 
       {/* Month selector */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={prevMonth}
-          className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm font-medium transition-colors"
-        >
-          ‹
-        </button>
-        <span className="text-base font-semibold text-gray-800 w-36 text-center">
-          {MONTHS[(month - 1) % 12]} {year}
-        </span>
-        <button
-          onClick={nextMonth}
-          className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm font-medium transition-colors"
-        >
-          ›
-        </button>
+      <div className="mb-6">
+        <MonthYearPicker value={period} onChange={setPeriod} />
       </div>
+
+      {/* Donut chart summary */}
+      {budgets.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-6 flex items-center gap-8">
+          <div className="relative w-36 h-36 shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={donutData}
+                  dataKey="value"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={44}
+                  outerRadius={66}
+                  startAngle={90}
+                  endAngle={-270}
+                  paddingAngle={2}
+                >
+                  {donutData.map((entry, i) => (
+                    <Cell key={i} fill={entry.fill} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <DonutCenter percentage={overallPercentage} />
+          </div>
+          <div className="space-y-1.5 text-sm">
+            <p className="text-gray-500">
+              Total planejado:{" "}
+              <span className="font-semibold text-gray-900">{formatBRL(totalBudgeted)}</span>
+            </p>
+            <p className="text-gray-500">
+              Total gasto:{" "}
+              <span className="font-semibold text-red-600">{formatBRL(totalSpent)}</span>
+            </p>
+            <p className="text-gray-500">
+              Disponível:{" "}
+              <span className="font-semibold text-green-600">{formatBRL(remaining)}</span>
+            </p>
+          </div>
+        </div>
+      )}
 
       {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
       {!isLoading && budgets.length === 0 && (
-        <p className="text-gray-500 text-sm">Nenhum orçamento definido para este mês.</p>
+        <EmptyState icon="📅" message="Nenhum orçamento definido para este mês." />
       )}
 
       <div className="space-y-3">
-        {budgets.map((budget) => (
-          <div key={budget.id} className="bg-white rounded-xl border border-gray-200 px-5 py-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{getIconEmoji(budget.category.icon)}</span>
-                <span className="text-sm font-semibold text-gray-900">{budget.category.name}</span>
+        {sortedBudgets.map((budget) => {
+          const isOver = budget.percentage > 100;
+          const remaining = Math.max(Number(budget.amount) - budget.spent, 0);
+          return (
+            <div
+              key={budget.id}
+              className={`bg-white rounded-xl border px-5 py-4 ${
+                isOver ? "border-red-300" : "border-gray-200"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">{getIconEmoji(budget.category.icon)}</span>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {budget.category.name}
+                  </span>
+                  {isOver && (
+                    <span className="text-xs font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                      Acima do limite
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      setFormError(null);
+                      setEditing(budget);
+                    }}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(budget)}
+                    className="text-xs text-red-600 hover:text-red-700 font-medium"
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-500">
-                  {formatBRL(budget.spent)} / {formatBRL(budget.amount)}
+              <ProgressBar percentage={budget.percentage} showLabel />
+              <div className="flex justify-between mt-1 text-xs text-gray-500">
+                <span>
+                  {formatBRL(budget.spent)} de {formatBRL(Number(budget.amount))}
                 </span>
-                <span
-                  className={`text-xs font-bold ${
-                    budget.percentage > 100
-                      ? "text-red-600"
-                      : budget.percentage >= 80
-                        ? "text-yellow-600"
-                        : "text-green-600"
-                  }`}
-                >
-                  {budget.percentage.toFixed(0)}%
+                <span className={isOver ? "text-red-600 font-medium" : ""}>
+                  {isOver
+                    ? `R$ ${(budget.spent - Number(budget.amount)).toFixed(2)} acima`
+                    : `${formatBRL(remaining)} restante`}
                 </span>
-                <button
-                  onClick={() => {
-                    setFormError(null);
-                    setEditing(budget);
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(budget)}
-                  className="text-xs text-red-600 hover:text-red-700 font-medium"
-                >
-                  Excluir
-                </button>
               </div>
             </div>
-            <ProgressBar percentage={budget.percentage} />
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {showCreate && (
         <Modal title="Definir orçamento" onClose={() => setShowCreate(false)}>
           <BudgetForm
             categories={categories}
-            month={month}
-            year={year}
+            month={period.month}
+            year={period.year}
             onSubmit={(categoryId, amount) => upsertMutation.mutate({ categoryId, amount })}
             loading={upsertMutation.isPending}
             error={formError}
@@ -277,8 +300,8 @@ export function BudgetsPage() {
           <BudgetForm
             categories={categories}
             existing={editing}
-            month={month}
-            year={year}
+            month={period.month}
+            year={period.year}
             onSubmit={(categoryId, amount) => upsertMutation.mutate({ categoryId, amount })}
             loading={upsertMutation.isPending}
             error={formError}
@@ -290,8 +313,7 @@ export function BudgetsPage() {
         <Modal title="Excluir orçamento" onClose={() => setDeleteTarget(null)}>
           <p className="text-sm text-gray-600 mb-4">
             Tem certeza que deseja excluir o orçamento de{" "}
-            <strong>&quot;{deleteTarget.category.name}&quot;</strong> para{" "}
-            {MONTHS[(month - 1) % 12]}/{year}?
+            <strong>&quot;{deleteTarget.category.name}&quot;</strong>?
           </p>
           <div className="flex gap-3">
             <button
