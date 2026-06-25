@@ -3,15 +3,18 @@ import type {
   PaginatedResponseDto,
   TransactionFiltersDto,
   TransactionResponseDto,
+  TransactionSummaryDto,
   UpdateTransactionRequestDto,
 } from "@fincontrol/types";
 import { AppError } from "../utils/appError.js";
 import { findAccountById, recalculateAccountBalance } from "../repositories/account.repository.js";
+import { findCategoriesByIds } from "../repositories/category.repository.js";
 import {
   createTransaction,
   deleteTransactionById,
   findTransactionById,
   findTransactions,
+  groupTransactionsByCategoryAndType,
   updateTransaction,
 } from "../repositories/transaction.repository.js";
 import type { TransactionWithDetails } from "../repositories/transaction.repository.js";
@@ -153,6 +156,34 @@ export async function updateTransactionForUser(
   }
 
   return toDto(tx);
+}
+
+export async function getTransactionSummary(
+  userId: string,
+  month: number,
+  year: number,
+  type: "INCOME" | "EXPENSE",
+): Promise<TransactionSummaryDto> {
+  const groups = await groupTransactionsByCategoryAndType(userId, type, month, year);
+  const categoryIds = groups.map((g) => g.categoryId);
+  const categories = await findCategoriesByIds(categoryIds);
+  const total = groups.reduce((sum, g) => sum + g.amount, 0);
+
+  const items = groups
+    .map((g) => {
+      const cat = categories.find((c) => c.id === g.categoryId);
+      return {
+        categoryId: g.categoryId,
+        categoryName: cat?.name ?? "Sem categoria",
+        color: cat?.color ?? "#808080",
+        amount: g.amount,
+        percentage: total > 0 ? Number(((g.amount / total) * 100).toFixed(1)) : 0,
+        count: g.count,
+      };
+    })
+    .sort((a, b) => b.amount - a.amount);
+
+  return { total, items };
 }
 
 export async function deleteTransactionForUser(id: string, userId: string): Promise<void> {

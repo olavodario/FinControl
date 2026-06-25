@@ -24,6 +24,11 @@ export async function deleteCategory(id: string): Promise<Category> {
   return prisma.category.delete({ where: { id } });
 }
 
+export async function findCategoriesByIds(ids: string[]): Promise<Category[]> {
+  if (ids.length === 0) return [];
+  return prisma.category.findMany({ where: { id: { in: ids } } });
+}
+
 export async function countTransactionsByCategory(categoryId: string): Promise<number> {
   return prisma.transaction.count({ where: { categoryId } });
 }

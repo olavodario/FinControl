@@ -25,6 +25,12 @@ export const updateTransactionSchema = z.object({
   recurring: z.boolean().optional(),
 });
 
+export const transactionSummaryQuerySchema = z.object({
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+  type: z.enum(["INCOME", "EXPENSE"]),
+});
+
 export const transactionFiltersSchema = z.object({
   accountId: z.string().optional(),
   categoryId: z.string().optional(),

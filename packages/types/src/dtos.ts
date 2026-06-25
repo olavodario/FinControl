@@ -132,3 +132,53 @@ export interface DashboardDto {
   recentTransactions: TransactionWithDetailsDto[];
   accounts: AccountResponseDto[];
 }
+
+// Dashboard Charts
+export type BudgetAlertStatus = "ok" | "warning" | "over";
+
+export interface ExpenseByCategoryDto {
+  categoryId: string;
+  categoryName: string;
+  color: string;
+  amount: number;
+  percentage: number;
+}
+
+export interface MonthlyEvolutionDto {
+  month: number;
+  year: number;
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+export interface BudgetAlertDto {
+  categoryId: string;
+  categoryName: string;
+  color: string;
+  budgeted: number;
+  spent: number;
+  percentage: number;
+  status: BudgetAlertStatus;
+}
+
+export interface DashboardChartsDto {
+  expenseByCategory: ExpenseByCategoryDto[];
+  monthlyEvolution: MonthlyEvolutionDto[];
+  budgetAlerts: BudgetAlertDto[];
+}
+
+// Transaction Summary
+export interface TransactionSummaryItemDto {
+  categoryId: string;
+  categoryName: string;
+  color: string;
+  amount: number;
+  percentage: number;
+  count: number;
+}
+
+export interface TransactionSummaryDto {
+  total: number;
+  items: TransactionSummaryItemDto[];
+}

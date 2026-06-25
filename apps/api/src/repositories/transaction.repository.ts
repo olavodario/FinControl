@@ -106,6 +106,36 @@ export async function sumTransactionsByTypeAndMonth(
   return Number(agg._sum.amount ?? 0);
 }
 
+export async function groupTransactionsByCategoryAndType(
+  userId: string,
+  type: "INCOME" | "EXPENSE",
+  month: number,
+  year: number,
+): Promise<{ categoryId: string; amount: number; count: number }[]> {
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 1);
+
+  const grouped = await prisma.transaction.groupBy({
+    by: ["categoryId"],
+    where: {
+      account: { userId },
+      type,
+      date: { gte: start, lt: end },
+      categoryId: { not: null },
+    },
+    _sum: { amount: true },
+    _count: { id: true },
+  });
+
+  return grouped
+    .filter((g): g is typeof g & { categoryId: string } => g.categoryId !== null)
+    .map((g) => ({
+      categoryId: g.categoryId,
+      amount: Number(g._sum.amount ?? 0),
+      count: g._count.id,
+    }));
+}
+
 export async function findRecentTransactions(
   userId: string,
   limit: number,

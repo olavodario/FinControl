@@ -3,6 +3,7 @@ import type { AuthRequest } from "../middlewares/authenticate.js";
 import {
   createTransactionSchema,
   transactionFiltersSchema,
+  transactionSummaryQuerySchema,
   updateTransactionSchema,
 } from "../schemas/transaction.schema.js";
 import * as transactionService from "../services/transaction.service.js";
@@ -61,6 +62,24 @@ export async function updateTransactionController(
     const dto = updateTransactionSchema.parse(req.body);
     const data = await transactionService.updateTransactionForUser(req.params["id"]!, userId, dto);
     res.json({ data, message: "Transação atualizada com sucesso." });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getTransactionSummaryController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { userId } = req as AuthRequest;
+    const query = transactionSummaryQuerySchema.parse(req.query);
+    const now = new Date();
+    const month = query.month ?? now.getMonth() + 1;
+    const year = query.year ?? now.getFullYear();
+    const data = await transactionService.getTransactionSummary(userId, month, year, query.type);
+    res.json({ data, message: "ok" });
   } catch (err) {
     next(err);
   }
