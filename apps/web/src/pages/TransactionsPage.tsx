@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type {
   AccountResponseDto,
   CategoryResponseDto,
@@ -7,10 +9,13 @@ import type {
   TransactionResponseDto,
   TransactionType,
 } from "@fincontrol/types";
+import { EmptyState } from "../components/shared/EmptyState.js";
 import { Modal } from "../components/shared/Modal.js";
+import { MonthYearPicker } from "../components/shared/MonthYearPicker.js";
 import { getIconEmoji } from "./CategoriesPage.js";
 import * as accountService from "../services/account.service.js";
 import * as categoryService from "../services/category.service.js";
+import * as chartsService from "../services/charts.service.js";
 import * as transactionService from "../services/transaction.service.js";
 
 function formatBRL(value: number) {
@@ -221,17 +226,112 @@ function TransactionForm({
   );
 }
 
+function SummaryPieChart({
+  title,
+  month,
+  year,
+  type,
+}: {
+  title: string;
+  month: number;
+  year: number;
+  type: "INCOME" | "EXPENSE";
+}) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["tx-summary", type, month, year],
+    queryFn: () => chartsService.getTransactionSummary(month, year, type),
+  });
+
+  if (isLoading) return <p className="text-sm text-gray-400 py-4">Carregando...</p>;
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 px-5 py-4">
+      <h3 className="text-sm font-semibold text-gray-700 mb-2">{title}</h3>
+      {!data || data.items.length === 0 ? (
+        <EmptyState
+          icon={type === "EXPENSE" ? "📉" : "📈"}
+          message={`Nenhuma ${type === "EXPENSE" ? "despesa" : "receita"} neste mês`}
+        />
+      ) : (
+        <>
+          <p className="text-xs text-gray-500 mb-3">Total: {formatBRL(data.total)}</p>
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={data.items}
+                dataKey="amount"
+                nameKey="categoryName"
+                cx="50%"
+                cy="50%"
+                outerRadius={70}
+              >
+                {data.items.map((entry) => (
+                  <Cell key={entry.categoryId} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(v) => formatBRL(Number(v))} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="mt-2 space-y-1">
+            {data.items.map((item) => (
+              <div key={item.categoryId} className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-gray-700">{item.categoryName}</span>
+                  <span className="text-gray-400">({item.count}x)</span>
+                </div>
+                <span className="text-gray-500">
+                  {formatBRL(item.amount)} · {item.percentage}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function TransactionsPage() {
   const qc = useQueryClient();
   const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
-  const [filterAccountId, setFilterAccountId] = useState("");
-  const [filterCategoryId, setFilterCategoryId] = useState("");
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const month = parseInt(searchParams.get("month") ?? String(now.getMonth() + 1));
+  const year = parseInt(searchParams.get("year") ?? String(now.getFullYear()));
+  const filterAccountId = searchParams.get("accountId") ?? "";
+  const filterCategoryId = searchParams.get("categoryId") ?? "";
+  const page = parseInt(searchParams.get("page") ?? "1");
+
+  const [activeTab, setActiveTab] = useState<"list" | "summary">("list");
   const [showCreate, setShowCreate] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<TransactionResponseDto | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+
+  function updateParams(updates: Record<string, string | undefined>) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      for (const [k, v] of Object.entries(updates)) {
+        if (v === undefined || v === "") {
+          next.delete(k);
+        } else {
+          next.set(k, v);
+        }
+      }
+      return next;
+    });
+  }
+
+  function clearFilters() {
+    setSearchParams({
+      month: String(now.getMonth() + 1),
+      year: String(now.getFullYear()),
+    });
+  }
 
   const { data: accounts = [] } = useQuery({
     queryKey: ["accounts"],
@@ -260,8 +360,10 @@ export function TransactionsPage() {
     mutationFn: transactionService.createTransaction,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["transactions"] });
+      qc.invalidateQueries({ queryKey: ["tx-summary"] });
       qc.invalidateQueries({ queryKey: ["accounts"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-charts"] });
       setShowCreate(false);
       setFormError(null);
     },
@@ -272,8 +374,10 @@ export function TransactionsPage() {
     mutationFn: transactionService.deleteTransaction,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["transactions"] });
+      qc.invalidateQueries({ queryKey: ["tx-summary"] });
       qc.invalidateQueries({ queryKey: ["accounts"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-charts"] });
       setDeleteTarget(null);
     },
     onError: () => alert("Erro ao excluir transação."),
@@ -281,21 +385,6 @@ export function TransactionsPage() {
 
   const transactions = txData?.items ?? [];
   const totalPages = txData?.pages ?? 1;
-
-  const MONTHS = [
-    "Janeiro",
-    "Fevereiro",
-    "Março",
-    "Abril",
-    "Maio",
-    "Junho",
-    "Julho",
-    "Agosto",
-    "Setembro",
-    "Outubro",
-    "Novembro",
-    "Dezembro",
-  ];
 
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">
@@ -312,39 +401,34 @@ export function TransactionsPage() {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-5 flex flex-wrap gap-4">
-        <div className="flex items-center gap-2">
-          <select
-            value={month}
-            onChange={(e) => {
-              setMonth(Number(e.target.value));
-              setPage(1);
-            }}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      {/* Tabs */}
+      <div className="flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit">
+        {(["list", "summary"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              activeTab === tab
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
           >
-            {MONTHS.map((m, i) => (
-              <option key={i} value={i + 1}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            value={year}
-            onChange={(e) => {
-              setYear(Number(e.target.value));
-              setPage(1);
-            }}
-            className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+            {tab === "list" ? "Lista" : "Resumo"}
+          </button>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-5 flex flex-wrap items-center gap-4">
+        <MonthYearPicker
+          value={{ month, year }}
+          onChange={(v) =>
+            updateParams({ month: String(v.month), year: String(v.year), page: "1" })
+          }
+        />
         <select
           value={filterAccountId}
-          onChange={(e) => {
-            setFilterAccountId(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => updateParams({ accountId: e.target.value, page: "1" })}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Todas as contas</option>
@@ -356,10 +440,7 @@ export function TransactionsPage() {
         </select>
         <select
           value={filterCategoryId}
-          onChange={(e) => {
-            setFilterCategoryId(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => updateParams({ categoryId: e.target.value, page: "1" })}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">Todas as categorias</option>
@@ -369,66 +450,87 @@ export function TransactionsPage() {
             </option>
           ))}
         </select>
+        <button
+          onClick={clearFilters}
+          className="text-sm text-gray-500 hover:text-gray-700 font-medium underline"
+        >
+          Limpar filtros
+        </button>
       </div>
 
-      {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
-
-      {!isLoading && transactions.length === 0 && (
-        <p className="text-gray-500 text-sm">Nenhuma transação neste período.</p>
-      )}
-
-      <div className="space-y-2">
-        {transactions.map((tx) => (
-          <div
-            key={tx.id}
-            className="bg-white rounded-xl border border-gray-200 px-5 py-3 flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              {tx.category && <span className="text-xl">{getIconEmoji(tx.category.icon)}</span>}
-              <div>
-                <p className="text-sm font-medium text-gray-900">{tx.description}</p>
-                <p className="text-xs text-gray-500">
-                  {formatDate(tx.date)} · {tx.account.name}
-                  {tx.category && ` · ${tx.category.name}`}
-                </p>
+      {/* Tab: Lista */}
+      {activeTab === "list" && (
+        <>
+          {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
+          {!isLoading && transactions.length === 0 && (
+            <EmptyState icon="💸" message="Nenhuma transação neste período." />
+          )}
+          <div className="space-y-2">
+            {transactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="bg-white rounded-xl border border-gray-200 px-5 py-3 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  {tx.category && <span className="text-xl">{getIconEmoji(tx.category.icon)}</span>}
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{tx.description}</p>
+                    <p className="text-xs text-gray-500">
+                      {formatDate(tx.date)} · {tx.account.name}
+                      {tx.category && ` · ${tx.category.name}`}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className={`text-sm font-bold ${TYPE_COLORS[tx.type]}`}>
+                    {tx.type === "EXPENSE" ? "−" : tx.type === "INCOME" ? "+" : "↔"}{" "}
+                    {formatBRL(tx.amount)}
+                  </span>
+                  <button
+                    onClick={() => setDeleteTarget(tx)}
+                    className="text-xs text-red-600 hover:text-red-700 font-medium"
+                  >
+                    Excluir
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className={`text-sm font-bold ${TYPE_COLORS[tx.type]}`}>
-                {tx.type === "EXPENSE" ? "−" : tx.type === "INCOME" ? "+" : "↔"}{" "}
-                {formatBRL(tx.amount)}
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <button
+                onClick={() => updateParams({ page: String(page - 1) })}
+                disabled={page === 1}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-colors"
+              >
+                Anterior
+              </button>
+              <span className="text-sm text-gray-600">
+                Página {page} de {totalPages}
               </span>
               <button
-                onClick={() => setDeleteTarget(tx)}
-                className="text-xs text-red-600 hover:text-red-700 font-medium"
+                onClick={() => updateParams({ page: String(page + 1) })}
+                disabled={page === totalPages}
+                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-colors"
               >
-                Excluir
+                Próxima
               </button>
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </>
+      )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3 mt-6">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-colors"
-          >
-            Anterior
-          </button>
-          <span className="text-sm text-gray-600">
-            Página {page} de {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-colors"
-          >
-            Próxima
-          </button>
+      {/* Tab: Resumo */}
+      {activeTab === "summary" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SummaryPieChart
+            title="Despesas por categoria"
+            month={month}
+            year={year}
+            type="EXPENSE"
+          />
+          <SummaryPieChart title="Receitas por categoria" month={month} year={year} type="INCOME" />
         </div>
       )}
 
