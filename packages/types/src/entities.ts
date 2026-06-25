@@ -30,6 +30,7 @@ export interface Category {
 export interface Transaction {
   id: string;
   accountId: string;
+  toAccountId: string | null;
   categoryId: string | null;
   amount: number;
   description: string;

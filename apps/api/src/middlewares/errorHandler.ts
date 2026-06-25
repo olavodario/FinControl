@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import { AppError } from "../utils/appError.js";
 import { AuthError } from "../services/auth.service.js";
 
 export function errorHandler(
@@ -19,6 +20,11 @@ export function errorHandler(
   if (err instanceof AuthError) {
     const status = err.code === "EMAIL_TAKEN" ? 409 : 401;
     res.status(status).json({ error: err.message, code: err.code });
+    return;
+  }
+
+  if (err instanceof AppError) {
+    res.status(err.statusCode).json({ error: err.message, code: err.code });
     return;
   }
 

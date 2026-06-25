@@ -20,15 +20,16 @@ model User {
 }
 
 model Account {
-  id           String        @id @default(cuid())
-  userId       String
-  name         String
-  type         AccountType
-  balance      Decimal       @default(0) @db.Decimal(12, 2)
-  currency     String        @default("BRL")
-  createdAt    DateTime      @default(now())
-  user         User          @relation(fields: [userId], references: [id])
-  transactions Transaction[]
+  id                String        @id @default(cuid())
+  userId            String
+  name              String
+  type              AccountType
+  balance           Decimal       @default(0) @db.Decimal(12, 2)
+  currency          String        @default("BRL")
+  createdAt         DateTime      @default(now())
+  user              User          @relation(fields: [userId], references: [id])
+  transactions      Transaction[] @relation("AccountOutgoing")
+  incomingTransfers Transaction[] @relation("AccountIncoming")
 }
 
 model Category {
@@ -46,6 +47,7 @@ model Category {
 model Transaction {
   id          String          @id @default(cuid())
   accountId   String
+  toAccountId String?
   categoryId  String?
   amount      Decimal         @db.Decimal(12, 2)
   description String
@@ -53,7 +55,8 @@ model Transaction {
   type        TransactionType
   recurring   Boolean         @default(false)
   createdAt   DateTime        @default(now())
-  account     Account         @relation(fields: [accountId], references: [id])
+  account     Account         @relation("AccountOutgoing", fields: [accountId], references: [id])
+  toAccount   Account?        @relation("AccountIncoming", fields: [toAccountId], references: [id])
   category    Category?       @relation(fields: [categoryId], references: [id])
 }
 
@@ -66,6 +69,8 @@ model Budget {
   year       Int
   user       User     @relation(fields: [userId], references: [id])
   category   Category @relation(fields: [categoryId], references: [id])
+
+  @@unique([userId, categoryId, month, year])
 }
 
 enum AccountType {

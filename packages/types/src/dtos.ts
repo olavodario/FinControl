@@ -31,7 +31,6 @@ export interface RefreshTokenResponseDto {
 export interface CreateAccountRequestDto {
   name: string;
   type: AccountType;
-  balance?: number;
   currency?: string;
 }
 
@@ -62,6 +61,7 @@ export type CategoryResponseDto = Category;
 // Transaction DTOs
 export interface CreateTransactionRequestDto {
   accountId: string;
+  toAccountId?: string;
   categoryId?: string;
   amount: number;
   description: string;
@@ -79,7 +79,24 @@ export interface UpdateTransactionRequestDto {
   recurring?: boolean;
 }
 
-export type TransactionResponseDto = Transaction;
+export interface TransactionFiltersDto {
+  accountId?: string;
+  categoryId?: string;
+  type?: TransactionType;
+  startDate?: string;
+  endDate?: string;
+  month?: number;
+  year?: number;
+  page?: number;
+  limit?: number;
+}
+
+export interface TransactionWithDetailsDto extends Transaction {
+  account: Pick<Account, "id" | "name">;
+  category: Pick<Category, "id" | "name" | "color" | "icon" | "type"> | null;
+}
+
+export type TransactionResponseDto = TransactionWithDetailsDto;
 
 // Budget DTOs
 export interface CreateBudgetRequestDto {
@@ -89,8 +106,29 @@ export interface CreateBudgetRequestDto {
   year: number;
 }
 
-export interface UpdateBudgetRequestDto {
-  amount?: number;
+export interface BudgetWithSpentDto extends Budget {
+  spent: number;
+  percentage: number;
+  category: Category;
 }
 
-export type BudgetResponseDto = Budget;
+export type BudgetResponseDto = BudgetWithSpentDto;
+
+// Pagination
+export interface PaginatedResponseDto<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+}
+
+// Dashboard
+export interface DashboardDto {
+  totalBalance: number;
+  monthIncome: number;
+  monthExpense: number;
+  monthBalance: number;
+  recentTransactions: TransactionWithDetailsDto[];
+  accounts: AccountResponseDto[];
+}
