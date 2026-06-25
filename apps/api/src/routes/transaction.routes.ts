@@ -1,0 +1,21 @@
+import { Router } from "express";
+import {
+  createTransactionController,
+  deleteTransactionController,
+  getTransactionController,
+  listTransactionsController,
+  updateTransactionController,
+} from "../controllers/transaction.controller.js";
+import { authenticate } from "../middlewares/authenticate.js";
+
+const router = Router();
+
+router.use(authenticate);
+
+router.get("/", listTransactionsController);
+router.post("/", createTransactionController);
+router.get("/:id", getTransactionController);
+router.put("/:id", updateTransactionController);
+router.delete("/:id", deleteTransactionController);
+
+export default router;
