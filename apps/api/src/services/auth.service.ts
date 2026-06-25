@@ -6,6 +6,7 @@ import {
   isRefreshTokenInvalidated,
 } from "../repositories/refreshToken.repository.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
+import { createDefaultCategoriesForUser } from "./category.service.js";
 
 export class AuthError extends Error {
   constructor(
@@ -24,6 +25,8 @@ export async function register(dto: RegisterRequestDto): Promise<AuthResponseDto
 
   const passwordHash = await bcrypt.hash(dto.password, 10);
   const user = await createUser({ name: dto.name, email: dto.email, passwordHash });
+
+  await createDefaultCategoriesForUser(user.id);
 
   const accessToken = signAccessToken(user.id);
   const refreshToken = signRefreshToken(user.id);
