@@ -3,7 +3,12 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { errorHandler } from "./middlewares/errorHandler.js";
-import routes from "./routes/index.js";
+import authRoutes from "./routes/auth.routes.js";
+import accountRoutes from "./routes/account.routes.js";
+import categoryRoutes from "./routes/category.routes.js";
+import transactionRoutes from "./routes/transaction.routes.js";
+import budgetRoutes from "./routes/budget.routes.js";
+import dashboardRoutes from "./routes/dashboard.routes.js";
 
 const app = express();
 
@@ -16,7 +21,12 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-app.use("/", routes);
+app.use("/auth", authRoutes);
+app.use("/accounts", accountRoutes);
+app.use("/categories", categoryRoutes);
+app.use("/transactions", transactionRoutes);
+app.use("/budgets", budgetRoutes);
+app.use("/dashboard", dashboardRoutes);
 
 app.use(errorHandler);
 
