@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import type { AuthRequest } from "../middlewares/authenticate.js";
 import {
   createTransactionSchema,
+  csvExportQuerySchema,
   transactionFiltersSchema,
   transactionSummaryQuerySchema,
   updateTransactionSchema,
@@ -80,6 +81,23 @@ export async function getTransactionSummaryController(
     const year = query.year ?? now.getFullYear();
     const data = await transactionService.getTransactionSummary(userId, month, year, query.type);
     res.json({ data, message: "ok" });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function exportTransactionsController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { userId } = req as AuthRequest;
+    const query = csvExportQuerySchema.parse(req.query);
+    const { csv, filename } = await transactionService.exportTransactionsToCSV(userId, query);
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.send("﻿" + csv);
   } catch (err) {
     next(err);
   }

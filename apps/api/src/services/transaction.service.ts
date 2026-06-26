@@ -12,6 +12,7 @@ import { findCategoriesByIds } from "../repositories/category.repository.js";
 import {
   createTransaction,
   deleteTransactionById,
+  findAllTransactionsForExport,
   findTransactionById,
   findTransactions,
   groupTransactionsByCategoryAndType,
@@ -184,6 +185,66 @@ export async function getTransactionSummary(
     .sort((a, b) => b.amount - a.amount);
 
   return { total, items };
+}
+
+const TYPE_PT: Record<string, string> = {
+  INCOME: "Receita",
+  EXPENSE: "Despesa",
+  TRANSFER: "Transferência",
+};
+
+export interface ExportFilters {
+  accountId?: string;
+  categoryId?: string;
+  startDate?: string;
+  endDate?: string;
+  month?: number;
+  year?: number;
+}
+
+export async function exportTransactionsToCSV(
+  userId: string,
+  filters: ExportFilters,
+): Promise<{ csv: string; filename: string }> {
+  let startDate: Date | undefined;
+  let endDate: Date | undefined;
+
+  if (filters.month && filters.year) {
+    startDate = new Date(filters.year, filters.month - 1, 1);
+    endDate = new Date(filters.year, filters.month, 0, 23, 59, 59);
+  } else if (filters.startDate || filters.endDate) {
+    if (filters.startDate) startDate = new Date(filters.startDate);
+    if (filters.endDate) endDate = new Date(filters.endDate);
+  } else {
+    const now = new Date();
+    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+    startDate = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+  }
+
+  const txs = await findAllTransactionsForExport(userId, {
+    accountId: filters.accountId,
+    categoryId: filters.categoryId,
+    startDate,
+    endDate,
+  });
+
+  const lines: string[] = ["Data;Descrição;Tipo;Categoria;Conta;Valor"];
+  for (const tx of txs) {
+    const date = new Date(tx.date).toLocaleDateString("pt-BR");
+    const type = TYPE_PT[tx.type] ?? tx.type;
+    const category = tx.category?.name ?? "";
+    const account = tx.account.name;
+    const value = tx.type === "EXPENSE" ? -Number(tx.amount) : Number(tx.amount);
+    lines.push(`${date};${tx.description};${type};${category};${account};${value.toFixed(2)}`);
+  }
+
+  const now = new Date();
+  const m = filters.month ?? now.getMonth() + 1;
+  const y = filters.year ?? now.getFullYear();
+  const mm = String(m).padStart(2, "0");
+  const filename = `fincontrol-${y}-${mm}.csv`;
+
+  return { csv: lines.join("\n"), filename };
 }
 
 export async function deleteTransactionForUser(id: string, userId: string): Promise<void> {

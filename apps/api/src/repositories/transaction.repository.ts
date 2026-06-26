@@ -147,3 +147,33 @@ export async function findRecentTransactions(
     take: limit,
   });
 }
+
+export async function findAllTransactionsForExport(
+  userId: string,
+  filters: {
+    accountId?: string;
+    categoryId?: string;
+    startDate?: Date;
+    endDate?: Date;
+  },
+): Promise<TransactionWithDetails[]> {
+  const where: Prisma.TransactionWhereInput = {
+    account: { userId },
+    ...(filters.accountId && { accountId: filters.accountId }),
+    ...(filters.categoryId && { categoryId: filters.categoryId }),
+    ...(filters.startDate || filters.endDate
+      ? {
+          date: {
+            ...(filters.startDate && { gte: filters.startDate }),
+            ...(filters.endDate && { lte: filters.endDate }),
+          },
+        }
+      : {}),
+  };
+
+  return prisma.transaction.findMany({
+    where,
+    include: transactionWithDetails,
+    orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+  });
+}

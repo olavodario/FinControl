@@ -31,6 +31,15 @@ export const transactionSummaryQuerySchema = z.object({
   type: z.enum(["INCOME", "EXPENSE"]),
 });
 
+export const csvExportQuerySchema = z.object({
+  accountId: z.string().optional(),
+  categoryId: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  month: z.coerce.number().int().min(1).max(12).optional(),
+  year: z.coerce.number().int().min(2000).max(2100).optional(),
+});
+
 export const transactionFiltersSchema = z.object({
   accountId: z.string().optional(),
   categoryId: z.string().optional(),
