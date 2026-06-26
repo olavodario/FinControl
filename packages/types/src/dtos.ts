@@ -1,4 +1,4 @@
-import type { AccountType, CategoryType, TransactionType } from "./enums.js";
+import type { AccountType, CategoryType, GoalStatus, TransactionType } from "./enums.js";
 import type { Account, Budget, Category, Transaction, User } from "./entities.js";
 
 // Auth DTOs
@@ -181,4 +181,56 @@ export interface TransactionSummaryItemDto {
 export interface TransactionSummaryDto {
   total: number;
   items: TransactionSummaryItemDto[];
+}
+
+// Goals
+export interface GoalResponseDto {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  deadline?: string;
+  color: string;
+  icon: string;
+  status: GoalStatus;
+  percentage: number;
+  remaining: number;
+  createdAt: string;
+}
+
+export interface CreateGoalRequestDto {
+  name: string;
+  targetAmount: number;
+  deadline?: string;
+  color?: string;
+  icon?: string;
+}
+
+export interface UpdateGoalRequestDto {
+  name?: string;
+  targetAmount?: number;
+  deadline?: string | null;
+  color?: string;
+  icon?: string;
+  status?: GoalStatus;
+}
+
+export interface DepositGoalRequestDto {
+  amount: number;
+}
+
+// Projection
+export interface MonthProjectionDto {
+  month: number;
+  year: number;
+  projectedIncome: number;
+  projectedExpense: number;
+  projectedBalance: number;
+}
+
+export interface ProjectionDto {
+  averageIncome: number;
+  averageExpense: number;
+  averageBalance: number;
+  projection: MonthProjectionDto[];
 }
