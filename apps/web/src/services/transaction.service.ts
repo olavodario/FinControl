@@ -8,6 +8,15 @@ import type {
 } from "@fincontrol/types";
 import { api } from "./api.js";
 
+export interface CsvExportParams {
+  month?: number;
+  year?: number;
+  accountId?: string;
+  categoryId?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 export async function getTransactions(
   filters?: TransactionFiltersDto,
 ): Promise<PaginatedResponseDto<TransactionResponseDto>> {
@@ -35,4 +44,24 @@ export async function updateTransaction(
 
 export async function deleteTransaction(id: string): Promise<void> {
   await api.delete(`/transactions/${id}`);
+}
+
+export async function downloadTransactionsCSV(params: CsvExportParams): Promise<void> {
+  const response = await api.get<Blob>("/transactions/export", {
+    params,
+    responseType: "blob",
+  });
+
+  const contentDisposition = response.headers["content-disposition"] as string | undefined;
+  const match = contentDisposition?.match(/filename="([^"]+)"/);
+  const filename = match?.[1] ?? "fincontrol-export.csv";
+
+  const url = URL.createObjectURL(response.data);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
