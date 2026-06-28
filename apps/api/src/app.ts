@@ -9,6 +9,7 @@ import categoryRoutes from "./routes/category.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
 import budgetRoutes from "./routes/budget.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import goalRoutes from "./routes/goal.routes.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/categories", categoryRoutes);
 app.use("/transactions", transactionRoutes);
 app.use("/budgets", budgetRoutes);
 app.use("/dashboard", dashboardRoutes);
+app.use("/goals", goalRoutes);
 
 app.use(errorHandler);
 
