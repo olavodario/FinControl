@@ -71,6 +71,37 @@ curl http://localhost:3333/health
 # {"status":"ok","timestamp":"..."}
 ```
 
+## Deploy (Vercel)
+
+> O banco de dados deve ser acessivel publicamente (ex: PlanetScale, Railway, Neon, Supabase).  
+> XAMPP local nao funciona em producao.
+
+### API (apps/api)
+
+1. Importe o projeto `apps/api` na Vercel como um novo projeto
+2. Configure as variaveis de ambiente no painel da Vercel:
+
+| Variavel             | Valor                                                           |
+| -------------------- | --------------------------------------------------------------- |
+| `DATABASE_URL`       | Connection string do banco remoto                               |
+| `JWT_SECRET`         | Secret longo e aleatorio                                        |
+| `JWT_REFRESH_SECRET` | Secret longo e aleatorio (diferente)                            |
+| `NODE_ENV`           | `production`                                                    |
+| `FRONTEND_URL`       | URL do deploy do frontend (ex: `https://fincontrol.vercel.app`) |
+
+3. Build command: `pnpm build` | Output: `dist`
+
+### Frontend (apps/web)
+
+1. Importe o projeto `apps/web` na Vercel como um novo projeto
+2. Configure a variavel de ambiente:
+
+| Variavel       | Valor                                                          |
+| -------------- | -------------------------------------------------------------- |
+| `VITE_API_URL` | URL do deploy da API (ex: `https://fincontrol-api.vercel.app`) |
+
+3. Build command: `pnpm build` | Output: `dist`
+
 ## Stack
 
 | Camada    | Tecnologia                    |
