@@ -7,3 +7,6 @@ const monthYearSchema = z.object({
 
 export const dashboardQuerySchema = monthYearSchema;
 export const dashboardChartsQuerySchema = monthYearSchema;
+export const projectionQuerySchema = z.object({
+  months: z.coerce.number().int().min(1).max(6).optional().default(3),
+});

@@ -90,9 +90,107 @@ function StatCard({
   );
 }
 
+async function exportDashboardPDF(
+  summary: Awaited<ReturnType<typeof dashboardService.getDashboard>>,
+  charts: Awaited<ReturnType<typeof chartsService.getDashboardCharts>>,
+  projection: Awaited<ReturnType<typeof dashboardService.getProjection>>,
+  period: { month: number; year: number },
+) {
+  const { default: jsPDF } = await import("jspdf");
+  const { default: autoTable } = await import("jspdf-autotable");
+
+  const doc = new jsPDF();
+  const monthName = MONTH_ABBR[period.month - 1] ?? String(period.month);
+  const title = `FinControl — Relatório ${monthName}/${period.year}`;
+
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text(title, 14, 20);
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(120);
+  doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 14, 27);
+  doc.setTextColor(0);
+
+  // Summary
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Resumo do mês", 14, 38);
+
+  autoTable(doc, {
+    startY: 42,
+    head: [["Saldo total", "Receitas", "Despesas", "Saldo do mês"]],
+    body: [
+      [
+        formatBRL(summary.totalBalance),
+        formatBRL(summary.monthIncome),
+        formatBRL(summary.monthExpense),
+        formatBRL(summary.monthBalance),
+      ],
+    ],
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [22, 163, 74] },
+  });
+
+  // Budget alerts
+  if (charts.budgetAlerts.length > 0) {
+    const afterSummary = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+      .finalY;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Alertas de orçamento", 14, afterSummary + 10);
+
+    autoTable(doc, {
+      startY: afterSummary + 14,
+      head: [["Categoria", "Orçado", "Gasto", "%", "Status"]],
+      body: charts.budgetAlerts.map((a) => [
+        a.categoryName,
+        formatBRL(a.budgeted),
+        formatBRL(a.spent),
+        `${a.percentage}%`,
+        a.status === "over" ? "Acima do limite" : a.status === "warning" ? "Atenção" : "OK",
+      ]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [22, 163, 74] },
+    });
+  }
+
+  // Projection
+  const afterBudget = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+    .finalY;
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "bold");
+  doc.text("Projeção — próximos 3 meses", 14, afterBudget + 10);
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    `Média (últimos 3 meses): Receita ${formatBRL(projection.averageIncome)} · Despesa ${formatBRL(projection.averageExpense)}`,
+    14,
+    afterBudget + 17,
+  );
+
+  autoTable(doc, {
+    startY: afterBudget + 21,
+    head: [["Mês", "Receita prevista", "Despesa prevista", "Saldo previsto"]],
+    body: projection.projection.map((p) => [
+      `${MONTH_ABBR[p.month - 1]}/${p.year}`,
+      formatBRL(p.projectedIncome),
+      formatBRL(p.projectedExpense),
+      formatBRL(p.projectedBalance),
+    ]),
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [22, 163, 74] },
+  });
+
+  doc.save(`fincontrol-${monthName.toLowerCase()}-${period.year}.pdf`);
+}
+
 export function DashboardPage() {
   const now = new Date();
   const [period, setPeriod] = useState({ month: now.getMonth() + 1, year: now.getFullYear() });
+  const [exporting, setExporting] = useState(false);
   const navigate = useNavigate();
 
   const { data: summary, isLoading: summaryLoading } = useQuery({
@@ -105,7 +203,23 @@ export function DashboardPage() {
     queryFn: () => chartsService.getDashboardCharts(period.month, period.year),
   });
 
+  const { data: projection, isLoading: projectionLoading } = useQuery({
+    queryKey: ["dashboard-projection"],
+    queryFn: () => dashboardService.getProjection(3),
+    staleTime: 5 * 60 * 1000,
+  });
+
   const isLoading = summaryLoading || chartsLoading;
+
+  async function handleExportPDF() {
+    if (!summary || !charts || !projection) return;
+    setExporting(true);
+    try {
+      await exportDashboardPDF(summary, charts, projection, period);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -133,7 +247,16 @@ export function DashboardPage() {
     <div className="px-6 py-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <MonthYearPicker value={period} onChange={setPeriod} />
+        <div className="flex items-center gap-3">
+          <MonthYearPicker value={period} onChange={setPeriod} />
+          <button
+            onClick={() => void handleExportPDF()}
+            disabled={exporting || !projection}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {exporting ? "Gerando..." : "📄 Exportar PDF"}
+          </button>
+        </div>
       </div>
 
       {/* Section 1 — Summary cards */}
@@ -226,7 +349,79 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Section 3 — Budget alerts + recent transactions + accounts */}
+      {/* Section 3 — Projection */}
+      <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-8">
+        <h2 className="text-sm font-semibold text-gray-700 mb-1">Projeção financeira</h2>
+        <p className="text-xs text-gray-400 mb-4">Baseada na média dos últimos 3 meses</p>
+        {projectionLoading || !projection ? (
+          <p className="text-sm text-gray-400">Calculando projeção...</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center">
+                <p className="text-xs text-gray-500 mb-1">Receita média</p>
+                <p className="text-base font-bold text-green-600">
+                  {formatBRL(projection.averageIncome)}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-500 mb-1">Despesa média</p>
+                <p className="text-base font-bold text-red-600">
+                  {formatBRL(projection.averageExpense)}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-500 mb-1">Saldo médio</p>
+                <p
+                  className={`text-base font-bold ${projection.averageBalance >= 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {formatBRL(projection.averageBalance)}
+                </p>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left text-xs font-medium text-gray-500 pb-2">Mês</th>
+                    <th className="text-right text-xs font-medium text-gray-500 pb-2">
+                      Receita prevista
+                    </th>
+                    <th className="text-right text-xs font-medium text-gray-500 pb-2">
+                      Despesa prevista
+                    </th>
+                    <th className="text-right text-xs font-medium text-gray-500 pb-2">
+                      Saldo previsto
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {projection.projection.map((p) => (
+                    <tr key={`${p.month}-${p.year}`} className="border-b border-gray-50">
+                      <td className="py-2 font-medium text-gray-800">
+                        {MONTH_ABBR[p.month - 1]}/{p.year}
+                      </td>
+                      <td className="py-2 text-right text-green-600">
+                        {formatBRL(p.projectedIncome)}
+                      </td>
+                      <td className="py-2 text-right text-red-600">
+                        {formatBRL(p.projectedExpense)}
+                      </td>
+                      <td
+                        className={`py-2 text-right font-semibold ${p.projectedBalance >= 0 ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {formatBRL(p.projectedBalance)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Section 4 — Budget alerts + recent transactions + accounts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Budget alerts */}
         <div className="bg-white rounded-xl border border-gray-200 px-5 py-4">

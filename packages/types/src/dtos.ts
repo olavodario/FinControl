@@ -219,6 +219,26 @@ export interface DepositGoalRequestDto {
   amount: number;
 }
 
+// Monthly Report
+export interface MonthlyReportCategoryDto {
+  categoryId: string;
+  categoryName: string;
+  color: string;
+  amount: number;
+  percentage: number;
+  count: number;
+}
+
+export interface MonthlyReportDto {
+  month: number;
+  year: number;
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  expenseByCategory: MonthlyReportCategoryDto[];
+  incomeByCategory: MonthlyReportCategoryDto[];
+}
+
 // Projection
 export interface MonthProjectionDto {
   month: number;

@@ -1,6 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import type { AuthRequest } from "../middlewares/authenticate.js";
-import { dashboardChartsQuerySchema, dashboardQuerySchema } from "../schemas/dashboard.schema.js";
+import {
+  dashboardChartsQuerySchema,
+  dashboardQuerySchema,
+  projectionQuerySchema,
+} from "../schemas/dashboard.schema.js";
 import * as dashboardService from "../services/dashboard.service.js";
 
 export async function getDashboardController(
@@ -30,6 +34,21 @@ export async function getDashboardChartsController(
     const month = query.month ?? now.getMonth() + 1;
     const year = query.year ?? now.getFullYear();
     const data = await dashboardService.getDashboardCharts(userId, month, year);
+    res.json({ data, message: "ok" });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getDashboardProjectionController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const { userId } = req as AuthRequest;
+    const { months } = projectionQuerySchema.parse(req.query);
+    const data = await dashboardService.getProjection(userId, months);
     res.json({ data, message: "ok" });
   } catch (err) {
     next(err);

@@ -3,6 +3,8 @@ import type {
   BudgetAlertStatus,
   DashboardChartsDto,
   DashboardDto,
+  MonthProjectionDto,
+  ProjectionDto,
 } from "@fincontrol/types";
 import { findCategoriesByIds } from "../repositories/category.repository.js";
 import { findAccountsByUser } from "../repositories/account.repository.js";
@@ -141,4 +143,63 @@ export async function getDashboardCharts(
   budgetAlerts.sort((a, b) => b.percentage - a.percentage);
 
   return { expenseByCategory, monthlyEvolution, budgetAlerts };
+}
+
+export async function getProjection(
+  userId: string,
+  lookbackMonths: number,
+): Promise<ProjectionDto> {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+
+  const pastMonths: { month: number; year: number }[] = [];
+  for (let i = lookbackMonths; i >= 1; i--) {
+    let m = currentMonth - i;
+    let y = currentYear;
+    while (m <= 0) {
+      m += 12;
+      y -= 1;
+    }
+    pastMonths.push({ month: m, year: y });
+  }
+
+  const pastData = await Promise.all(
+    pastMonths.map(async ({ month, year }) => {
+      const [income, expense] = await Promise.all([
+        sumTransactionsByTypeAndMonth(userId, "INCOME", month, year),
+        sumTransactionsByTypeAndMonth(userId, "EXPENSE", month, year),
+      ]);
+      return { income, expense };
+    }),
+  );
+
+  const count = pastData.length;
+  const avgIncome = pastData.reduce((s, d) => s + d.income, 0) / count;
+  const avgExpense = pastData.reduce((s, d) => s + d.expense, 0) / count;
+  const avgBalance = avgIncome - avgExpense;
+
+  const projection: MonthProjectionDto[] = [];
+  for (let i = 1; i <= 3; i++) {
+    let m = currentMonth + i;
+    let y = currentYear;
+    while (m > 12) {
+      m -= 12;
+      y += 1;
+    }
+    projection.push({
+      month: m,
+      year: y,
+      projectedIncome: Number(avgIncome.toFixed(2)),
+      projectedExpense: Number(avgExpense.toFixed(2)),
+      projectedBalance: Number(avgBalance.toFixed(2)),
+    });
+  }
+
+  return {
+    averageIncome: Number(avgIncome.toFixed(2)),
+    averageExpense: Number(avgExpense.toFixed(2)),
+    averageBalance: Number(avgBalance.toFixed(2)),
+    projection,
+  };
 }
