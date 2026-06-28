@@ -10,6 +10,7 @@ import { GoalsPage } from "./pages/GoalsPage.js";
 import { LoginPage } from "./pages/LoginPage.js";
 import { RegisterPage } from "./pages/RegisterPage.js";
 import { TransactionsPage } from "./pages/TransactionsPage.js";
+import { NotFoundPage } from "./pages/NotFoundPage.js";
 import { useAuthStore } from "./stores/auth.store.js";
 
 export function App() {
@@ -43,6 +44,8 @@ export function App() {
         <Route path="/budgets" element={<BudgetsPage />} />
         <Route path="/goals" element={<GoalsPage />} />
       </Route>
+
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
