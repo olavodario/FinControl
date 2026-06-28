@@ -17,6 +17,7 @@ import * as accountService from "../services/account.service.js";
 import * as categoryService from "../services/category.service.js";
 import * as chartsService from "../services/charts.service.js";
 import * as transactionService from "../services/transaction.service.js";
+import toast from "react-hot-toast";
 
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -405,7 +406,7 @@ export function TransactionsPage() {
       qc.invalidateQueries({ queryKey: ["dashboard-charts"] });
       setDeleteTarget(null);
     },
-    onError: () => alert("Erro ao excluir transação."),
+    onError: () => toast.error("Erro ao excluir transação."),
   });
 
   const transactions = txData?.items ?? [];

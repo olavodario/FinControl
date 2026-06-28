@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { AccountResponseDto, AccountType, CreateAccountRequestDto } from "@fincontrol/types";
 import { Modal } from "../components/shared/Modal.js";
 import * as accountService from "../services/account.service.js";
+import toast from "react-hot-toast";
 
 const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
   CHECKING: "Conta Corrente",
@@ -115,7 +116,7 @@ export function AccountsPage() {
         "ACCOUNT_HAS_TRANSACTIONS"
           ? "Não é possível excluir uma conta com transações."
           : "Erro ao excluir conta.";
-      alert(msg);
+      toast.error(msg);
     },
   });
 

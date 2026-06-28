@@ -7,6 +7,7 @@ import type {
 } from "@fincontrol/types";
 import { Modal } from "../components/shared/Modal.js";
 import * as categoryService from "../services/category.service.js";
+import toast from "react-hot-toast";
 
 const PRESET_ICONS = [
   { name: "food", label: "Alimentação", emoji: "🍕" },
@@ -160,7 +161,7 @@ export function CategoriesPage() {
         "CATEGORY_HAS_TRANSACTIONS"
           ? "Não é possível excluir uma categoria com transações."
           : "Erro ao excluir categoria.";
-      alert(msg);
+      toast.error(msg);
     },
   });
 

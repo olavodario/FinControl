@@ -9,6 +9,7 @@ import { ProgressBar } from "../components/shared/ProgressBar.js";
 import { getIconEmoji } from "./CategoriesPage.js";
 import * as categoryService from "../services/category.service.js";
 import * as budgetService from "../services/budget.service.js";
+import toast from "react-hot-toast";
 
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -157,7 +158,7 @@ export function BudgetsPage() {
       qc.invalidateQueries({ queryKey: ["dashboard-charts"] });
       setDeleteTarget(null);
     },
-    onError: () => alert("Erro ao excluir orçamento."),
+    onError: () => toast.error("Erro ao excluir orçamento."),
   });
 
   return (

@@ -9,6 +9,7 @@ import { EmptyState } from "../components/shared/EmptyState.js";
 import { Modal } from "../components/shared/Modal.js";
 import { ProgressBar } from "../components/shared/ProgressBar.js";
 import * as goalService from "../services/goal.service.js";
+import toast from "react-hot-toast";
 
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -326,7 +327,7 @@ export function GoalsPage() {
       qc.invalidateQueries({ queryKey: ["goals"] });
       setDeleteTarget(null);
     },
-    onError: () => alert("Erro ao excluir meta."),
+    onError: () => toast.error("Erro ao excluir meta."),
   });
 
   const activeGoals = goals.filter((g) => g.status === "ACTIVE");
