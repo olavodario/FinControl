@@ -29,7 +29,7 @@ function formatDate(date: Date | string) {
 const TYPE_COLORS: Record<TransactionType, string> = {
   INCOME: "text-green-600",
   EXPENSE: "text-red-600",
-  TRANSFER: "text-blue-600",
+  TRANSFER: "text-[var(--color-brand)]",
 };
 
 const TYPE_LABELS: Record<TransactionType, string> = {
@@ -86,7 +86,7 @@ function TransactionForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Tipo</label>
         <div className="flex gap-2">
           {(["EXPENSE", "INCOME", "TRANSFER"] as TransactionType[]).map((t) => (
             <button
@@ -99,8 +99,8 @@ function TransactionForm({
                     ? "bg-green-600 text-white border-green-600"
                     : t === "EXPENSE"
                       ? "bg-red-600 text-white border-red-600"
-                      : "bg-blue-600 text-white border-blue-600"
-                  : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                      : "bg-[var(--color-brand)] text-white border-[var(--color-brand)]"
+                  : "border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)]"
               }`}
             >
               {TYPE_LABELS[t]}
@@ -111,7 +111,9 @@ function TransactionForm({
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Valor (R$)</label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+            Valor (R$)
+          </label>
           <input
             required
             type="number"
@@ -119,42 +121,44 @@ function TransactionForm({
             min="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
             placeholder="0,00"
           />
         </div>
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Data</label>
           <input
             required
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+          Descrição
+        </label>
         <input
           required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
           placeholder="Ex: Supermercado, Salário..."
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
           {type === "TRANSFER" ? "Conta de origem" : "Conta"}
         </label>
         <select
           required
           value={accountId}
           onChange={(e) => setAccountId(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
         >
           <option value="">Selecione uma conta</option>
           {accounts.map((a) => (
@@ -167,12 +171,14 @@ function TransactionForm({
 
       {type === "TRANSFER" && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Conta de destino</label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+            Conta de destino
+          </label>
           <select
             required
             value={toAccountId}
             onChange={(e) => setToAccountId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
           >
             <option value="">Selecione uma conta</option>
             {accounts
@@ -188,11 +194,13 @@ function TransactionForm({
 
       {type !== "TRANSFER" && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+            Categoria
+          </label>
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
           >
             <option value="">Sem categoria</option>
             {filteredCategories.map((c) => (
@@ -211,14 +219,14 @@ function TransactionForm({
           onChange={(e) => setRecurring(e.target.checked)}
           className="w-4 h-4 rounded"
         />
-        <span className="text-sm text-gray-700">Transação recorrente</span>
+        <span className="text-sm text-[var(--text-primary)]">Transação recorrente</span>
       </label>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
+        className="w-full bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
       >
         {loading ? "Salvando..." : submitLabel}
       </button>
@@ -242,11 +250,11 @@ function SummaryPieChart({
     queryFn: () => chartsService.getTransactionSummary(month, year, type),
   });
 
-  if (isLoading) return <p className="text-sm text-gray-400 py-4">Carregando...</p>;
+  if (isLoading) return <p className="text-sm text-[var(--text-secondary)] py-4">Carregando...</p>;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 px-5 py-4">
-      <h3 className="text-sm font-semibold text-gray-700 mb-2">{title}</h3>
+    <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] px-5 py-4">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-2">{title}</h3>
       {!data || data.items.length === 0 ? (
         <EmptyState
           icon={type === "EXPENSE" ? "📉" : "📈"}
@@ -254,7 +262,9 @@ function SummaryPieChart({
         />
       ) : (
         <>
-          <p className="text-xs text-gray-500 mb-3">Total: {formatBRL(data.total)}</p>
+          <p className="text-xs text-[var(--text-secondary)] mb-3">
+            Total: {formatBRL(data.total)}
+          </p>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
@@ -281,10 +291,10 @@ function SummaryPieChart({
                     className="inline-block w-2 h-2 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-gray-700">{item.categoryName}</span>
-                  <span className="text-gray-400">({item.count}x)</span>
+                  <span className="text-[var(--text-primary)]">{item.categoryName}</span>
+                  <span className="text-[var(--text-secondary)]">({item.count}x)</span>
                 </div>
-                <span className="text-gray-500">
+                <span className="text-[var(--text-secondary)]">
                   {formatBRL(item.amount)} · {item.percentage}%
                 </span>
               </div>
@@ -404,28 +414,28 @@ export function TransactionsPage() {
   return (
     <div className="px-6 py-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Transações</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Transações</h1>
         <button
           onClick={() => {
             setFormError(null);
             setShowCreate(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + Nova transação
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-gray-100 p-1 rounded-lg w-fit">
+      <div className="flex gap-1 mb-5 bg-[var(--bg-secondary)] p-1 rounded-lg w-fit">
         {(["list", "summary"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
               activeTab === tab
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             {tab === "list" ? "Lista" : "Resumo"}
@@ -434,7 +444,7 @@ export function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-5 flex flex-wrap items-center gap-4">
+      <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] px-5 py-4 mb-5 flex flex-wrap items-center gap-4">
         <MonthYearPicker
           value={{ month, year }}
           onChange={(v) =>
@@ -444,7 +454,7 @@ export function TransactionsPage() {
         <select
           value={filterAccountId}
           onChange={(e) => updateParams({ accountId: e.target.value, page: "1" })}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
         >
           <option value="">Todas as contas</option>
           {accounts.map((a) => (
@@ -456,7 +466,7 @@ export function TransactionsPage() {
         <select
           value={filterCategoryId}
           onChange={(e) => updateParams({ categoryId: e.target.value, page: "1" })}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
         >
           <option value="">Todas as categorias</option>
           {categories.map((c) => (
@@ -467,14 +477,14 @@ export function TransactionsPage() {
         </select>
         <button
           onClick={clearFilters}
-          className="text-sm text-gray-500 hover:text-gray-700 font-medium underline"
+          className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium underline"
         >
           Limpar filtros
         </button>
         <button
           onClick={handleExportCSV}
           disabled={exportLoading}
-          className="ml-auto text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 disabled:opacity-60 transition-colors"
+          className="ml-auto text-sm font-medium px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] disabled:opacity-60 transition-colors"
         >
           {exportLoading ? "Exportando..." : "Exportar CSV"}
         </button>
@@ -483,7 +493,7 @@ export function TransactionsPage() {
       {/* Tab: Lista */}
       {activeTab === "list" && (
         <>
-          {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
+          {isLoading && <p className="text-[var(--text-secondary)] text-sm">Carregando...</p>}
           {!isLoading && transactions.length === 0 && (
             <EmptyState icon="💸" message="Nenhuma transação neste período." />
           )}
@@ -491,13 +501,15 @@ export function TransactionsPage() {
             {transactions.map((tx) => (
               <div
                 key={tx.id}
-                className="bg-white rounded-xl border border-gray-200 px-5 py-3 flex items-center justify-between"
+                className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] px-5 py-3 flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
                   {tx.category && <span className="text-xl">{getIconEmoji(tx.category.icon)}</span>}
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{tx.description}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">
+                      {tx.description}
+                    </p>
+                    <p className="text-xs text-[var(--text-secondary)]">
                       {formatDate(tx.date)} · {tx.account.name}
                       {tx.category && ` · ${tx.category.name}`}
                     </p>
@@ -510,7 +522,7 @@ export function TransactionsPage() {
                   </span>
                   <button
                     onClick={() => setDeleteTarget(tx)}
-                    className="text-xs text-red-600 hover:text-red-700 font-medium"
+                    className="text-xs text-[var(--danger)] hover:text-red-700 font-medium"
                   >
                     Excluir
                   </button>
@@ -524,17 +536,17 @@ export function TransactionsPage() {
               <button
                 onClick={() => updateParams({ page: String(page - 1) })}
                 disabled={page === 1}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                className="px-3 py-1.5 text-sm border border-[var(--border)] rounded-lg disabled:opacity-40 hover:bg-[var(--bg-secondary)] transition-colors"
               >
                 Anterior
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-[var(--text-secondary)]">
                 Página {page} de {totalPages}
               </span>
               <button
                 onClick={() => updateParams({ page: String(page + 1) })}
                 disabled={page === totalPages}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition-colors"
+                className="px-3 py-1.5 text-sm border border-[var(--border)] rounded-lg disabled:opacity-40 hover:bg-[var(--bg-secondary)] transition-colors"
               >
                 Próxima
               </button>
@@ -571,14 +583,14 @@ export function TransactionsPage() {
 
       {deleteTarget && (
         <Modal title="Excluir transação" onClose={() => setDeleteTarget(null)}>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-[var(--text-secondary)] mb-4">
             Tem certeza que deseja excluir a transação{" "}
             <strong>&quot;{deleteTarget.description}&quot;</strong>?
           </p>
           <div className="flex gap-3">
             <button
               onClick={() => setDeleteTarget(null)}
-              className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 border border-[var(--border)] text-[var(--text-primary)] text-sm font-medium py-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors"
             >
               Cancelar
             </button>

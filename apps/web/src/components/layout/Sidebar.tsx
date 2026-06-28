@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../stores/auth.store.js";
+import { ThemeToggle } from "../shared/ThemeToggle.js";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: "📊" },
@@ -21,9 +22,10 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-56 shrink-0 bg-white border-r border-gray-200 flex flex-col">
-      <div className="px-5 py-5 border-b border-gray-100">
-        <span className="text-lg font-bold text-blue-600">FinControl</span>
+    <aside className="w-56 shrink-0 bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col">
+      <div className="px-5 py-5 border-b border-[var(--border)] flex items-center justify-between">
+        <span className="text-lg font-bold text-[var(--color-brand)]">FinControl</span>
+        <ThemeToggle />
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -34,8 +36,8 @@ export function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-[var(--color-brand)] text-white"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
               }`
             }
           >
@@ -45,11 +47,11 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="px-5 py-4 border-t border-gray-100">
-        <p className="text-xs font-medium text-gray-700 truncate mb-2">{user?.name}</p>
+      <div className="px-5 py-4 border-t border-[var(--border)]">
+        <p className="text-xs font-medium text-[var(--text-primary)] truncate mb-2">{user?.name}</p>
         <button
           onClick={handleLogout}
-          className="w-full text-left text-xs text-red-600 hover:text-red-700 font-medium"
+          className="w-full text-left text-xs text-[var(--danger)] hover:opacity-80 font-medium transition-opacity"
         >
           Sair
         </button>

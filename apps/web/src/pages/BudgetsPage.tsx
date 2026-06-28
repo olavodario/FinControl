@@ -45,12 +45,14 @@ function BudgetForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {!existing && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+            Categoria
+          </label>
           <select
             required
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
           >
             <option value="">Selecione uma categoria</option>
             {categories
@@ -64,7 +66,7 @@ function BudgetForm({
         </div>
       )}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
           Valor planejado para {month}/{year} (R$)
         </label>
         <input
@@ -74,15 +76,15 @@ function BudgetForm({
           min="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
           placeholder="0,00"
         />
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
+        className="w-full bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
       >
         {loading ? "Salvando..." : "Salvar orçamento"}
       </button>
@@ -96,7 +98,7 @@ function DonutCenter({ percentage }: { percentage: number }) {
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
       <span className={`text-xl font-bold ${color}`}>{percentage.toFixed(0)}%</span>
-      <span className="text-xs text-gray-500">gasto</span>
+      <span className="text-xs text-[var(--text-secondary)]">gasto</span>
     </div>
   );
 }
@@ -161,13 +163,13 @@ export function BudgetsPage() {
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Orçamento</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Orçamento</h1>
         <button
           onClick={() => {
             setFormError(null);
             setShowCreate(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + Definir orçamento
         </button>
@@ -180,7 +182,7 @@ export function BudgetsPage() {
 
       {/* Donut chart summary */}
       {budgets.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-6 flex items-center gap-8">
+        <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] px-5 py-4 mb-6 flex items-center gap-8">
           <div className="relative w-36 h-36 shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -204,15 +206,17 @@ export function BudgetsPage() {
             <DonutCenter percentage={overallPercentage} />
           </div>
           <div className="space-y-1.5 text-sm">
-            <p className="text-gray-500">
+            <p className="text-[var(--text-secondary)]">
               Total planejado:{" "}
-              <span className="font-semibold text-gray-900">{formatBRL(totalBudgeted)}</span>
+              <span className="font-semibold text-[var(--text-primary)]">
+                {formatBRL(totalBudgeted)}
+              </span>
             </p>
-            <p className="text-gray-500">
+            <p className="text-[var(--text-secondary)]">
               Total gasto:{" "}
               <span className="font-semibold text-red-600">{formatBRL(totalSpent)}</span>
             </p>
-            <p className="text-gray-500">
+            <p className="text-[var(--text-secondary)]">
               Disponível:{" "}
               <span className="font-semibold text-green-600">{formatBRL(remaining)}</span>
             </p>
@@ -220,7 +224,7 @@ export function BudgetsPage() {
         </div>
       )}
 
-      {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
+      {isLoading && <p className="text-[var(--text-secondary)] text-sm">Carregando...</p>}
       {!isLoading && budgets.length === 0 && (
         <EmptyState icon="📅" message="Nenhum orçamento definido para este mês." />
       )}
@@ -232,14 +236,14 @@ export function BudgetsPage() {
           return (
             <div
               key={budget.id}
-              className={`bg-white rounded-xl border px-5 py-4 ${
-                isOver ? "border-red-300" : "border-gray-200"
+              className={`bg-[var(--bg-card)] rounded-xl border px-5 py-4 ${
+                isOver ? "border-red-300" : "border-[var(--border)]"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{getIconEmoji(budget.category.icon)}</span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-semibold text-[var(--text-primary)]">
                     {budget.category.name}
                   </span>
                   {isOver && (
@@ -254,20 +258,20 @@ export function BudgetsPage() {
                       setFormError(null);
                       setEditing(budget);
                     }}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-xs text-[var(--color-brand)] hover:text-[var(--color-brand-hover)] font-medium"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => setDeleteTarget(budget)}
-                    className="text-xs text-red-600 hover:text-red-700 font-medium"
+                    className="text-xs text-[var(--danger)] hover:text-red-700 font-medium"
                   >
                     Excluir
                   </button>
                 </div>
               </div>
               <ProgressBar percentage={budget.percentage} showLabel />
-              <div className="flex justify-between mt-1 text-xs text-gray-500">
+              <div className="flex justify-between mt-1 text-xs text-[var(--text-secondary)]">
                 <span>
                   {formatBRL(budget.spent)} de {formatBRL(Number(budget.amount))}
                 </span>
@@ -311,14 +315,14 @@ export function BudgetsPage() {
 
       {deleteTarget && (
         <Modal title="Excluir orçamento" onClose={() => setDeleteTarget(null)}>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-[var(--text-secondary)] mb-4">
             Tem certeza que deseja excluir o orçamento de{" "}
             <strong>&quot;{deleteTarget.category.name}&quot;</strong>?
           </p>
           <div className="flex gap-3">
             <button
               onClick={() => setDeleteTarget(null)}
-              className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 border border-[var(--border)] text-[var(--text-primary)] text-sm font-medium py-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors"
             >
               Cancelar
             </button>

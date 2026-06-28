@@ -49,41 +49,41 @@ function CategoryForm({ initial, onSubmit, loading, error, submitLabel }: Catego
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Nome</label>
         <input
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
           placeholder="Nome da categoria"
         />
       </div>
 
       <div className="flex gap-4">
         <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Tipo</label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as CategoryType)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
           >
             <option value="EXPENSE">Despesa</option>
             <option value="INCOME">Receita</option>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Cor</label>
+          <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Cor</label>
           <input
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="h-9 w-16 rounded-lg border border-gray-300 cursor-pointer p-0.5"
+            className="h-9 w-16 rounded-lg border border-[var(--border)] cursor-pointer p-0.5"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Ícone</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">Ícone</label>
         <div className="grid grid-cols-6 gap-2">
           {PRESET_ICONS.map((ic) => (
             <button
@@ -93,8 +93,8 @@ function CategoryForm({ initial, onSubmit, loading, error, submitLabel }: Catego
               onClick={() => setIcon(ic.name)}
               className={`flex flex-col items-center justify-center p-2 rounded-lg border text-lg transition-colors ${
                 icon === ic.name
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-[var(--color-brand)] bg-[var(--color-brand)]/10"
+                  : "border-[var(--border)] hover:border-[var(--border)]"
               }`}
             >
               {ic.emoji}
@@ -103,11 +103,11 @@ function CategoryForm({ initial, onSubmit, loading, error, submitLabel }: Catego
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
+        className="w-full bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
       >
         {loading ? "Salvando..." : submitLabel}
       </button>
@@ -170,36 +170,36 @@ export function CategoriesPage() {
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Categorias</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Categorias</h1>
         <button
           onClick={() => {
             setFormError(null);
             setShowCreate(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + Nova categoria
         </button>
       </div>
 
-      {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
+      {isLoading && <p className="text-[var(--text-secondary)] text-sm">Carregando...</p>}
 
       {[
         { label: "Despesas", items: expenses },
         { label: "Receitas", items: incomes },
       ].map(({ label, items }) => (
         <div key={label} className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
             {label}
           </h2>
           {items.length === 0 && (
-            <p className="text-sm text-gray-400">Nenhuma categoria cadastrada.</p>
+            <p className="text-sm text-[var(--text-secondary)]">Nenhuma categoria cadastrada.</p>
           )}
           <div className="space-y-2">
             {items.map((cat) => (
               <div
                 key={cat.id}
-                className="bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center justify-between"
+                className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] px-4 py-3 flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
                   <span
@@ -209,7 +209,7 @@ export function CategoriesPage() {
                     {getIconEmoji(cat.icon)}
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{cat.name}</p>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{cat.name}</p>
                     <span
                       className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         cat.type === "INCOME"
@@ -227,13 +227,13 @@ export function CategoriesPage() {
                       setFormError(null);
                       setEditing(cat);
                     }}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-xs text-[var(--color-brand)] hover:text-[var(--color-brand-hover)] font-medium"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => setDeleteTarget(cat)}
-                    className="text-xs text-red-600 hover:text-red-700 font-medium"
+                    className="text-xs text-[var(--danger)] hover:text-red-700 font-medium"
                   >
                     Excluir
                   </button>
@@ -269,14 +269,14 @@ export function CategoriesPage() {
 
       {deleteTarget && (
         <Modal title="Excluir categoria" onClose={() => setDeleteTarget(null)}>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-[var(--text-secondary)] mb-4">
             Tem certeza que deseja excluir a categoria{" "}
             <strong>&quot;{deleteTarget.name}&quot;</strong>?
           </p>
           <div className="flex gap-3">
             <button
               onClick={() => setDeleteTarget(null)}
-              className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 border border-[var(--border)] text-[var(--text-primary)] text-sm font-medium py-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors"
             >
               Cancelar
             </button>

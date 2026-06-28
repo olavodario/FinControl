@@ -72,18 +72,22 @@ function GoalForm({ onSubmit, loading, error }: GoalFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nome da meta</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+          Nome da meta
+        </label>
         <input
           type="text"
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Ex: Reserva de emergência"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Valor alvo (R$)</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+          Valor alvo (R$)
+        </label>
         <input
           type="number"
           required
@@ -92,24 +96,26 @@ function GoalForm({ onSubmit, loading, error }: GoalFormProps) {
           value={targetAmount}
           onChange={(e) => setTargetAmount(e.target.value)}
           placeholder="0,00"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Prazo (opcional)</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+          Prazo (opcional)
+        </label>
         <input
           type="date"
           value={deadline}
           onChange={(e) => setDeadline(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">Ícone</label>
         <select
           value={icon}
           onChange={(e) => setIcon(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
         >
           {ICON_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
@@ -119,7 +125,7 @@ function GoalForm({ onSubmit, loading, error }: GoalFormProps) {
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Cor</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">Cor</label>
         <div className="flex gap-2 flex-wrap">
           {COLOR_OPTIONS.map((c) => (
             <button
@@ -134,11 +140,11 @@ function GoalForm({ onSubmit, loading, error }: GoalFormProps) {
           ))}
         </div>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
+        className="w-full bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
       >
         {loading ? "Salvando..." : "Criar meta"}
       </button>
@@ -163,7 +169,7 @@ function DepositForm({ goal, onSubmit, loading, error }: DepositFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
+      <div className="bg-[var(--bg-primary)] rounded-lg p-3 text-sm text-[var(--text-secondary)]">
         <p>
           Progresso atual:{" "}
           <strong>
@@ -171,11 +177,11 @@ function DepositForm({ goal, onSubmit, loading, error }: DepositFormProps) {
           </strong>
         </p>
         <p>
-          Faltam: <strong className="text-blue-600">{formatBRL(goal.remaining)}</strong>
+          Faltam: <strong className="text-[var(--color-brand)]">{formatBRL(goal.remaining)}</strong>
         </p>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
           Valor do depósito (R$)
         </label>
         <input
@@ -186,14 +192,14 @@ function DepositForm({ goal, onSubmit, loading, error }: DepositFormProps) {
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="0,00"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-[var(--border)] rounded-lg px-3 py-2 text-sm bg-[var(--bg-secondary)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
         />
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
+        className="w-full bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white font-medium py-2 rounded-lg text-sm disabled:opacity-60 transition-colors"
       >
         {loading ? "Depositando..." : "Confirmar depósito"}
       </button>
@@ -213,8 +219,8 @@ function GoalCard({ goal, onDeposit, onDelete }: GoalCardProps) {
 
   return (
     <div
-      className={`bg-white rounded-xl border px-5 py-4 ${
-        isCompleted ? "border-green-200 bg-green-50/30" : "border-gray-200"
+      className={`bg-[var(--bg-card)] rounded-xl border px-5 py-4 ${
+        isCompleted ? "border-green-200 bg-green-50/30" : "border-[var(--border)]"
       }`}
     >
       <div className="flex items-start justify-between mb-3">
@@ -227,19 +233,21 @@ function GoalCard({ goal, onDeposit, onDelete }: GoalCardProps) {
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-gray-900">{goal.name}</p>
+              <p className="text-sm font-semibold text-[var(--text-primary)]">{goal.name}</p>
               {isCompleted && (
                 <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-0.5 rounded-full">
                   Concluída
                 </span>
               )}
             </div>
-            {deadline && <p className="text-xs text-gray-500 mt-0.5">Prazo: {deadline}</p>}
+            {deadline && (
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">Prazo: {deadline}</p>
+            )}
           </div>
         </div>
         <button
           onClick={() => onDelete(goal)}
-          className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+          className="text-xs text-[var(--text-secondary)] hover:text-[var(--danger)] transition-colors"
         >
           Excluir
         </button>
@@ -251,7 +259,7 @@ function GoalCard({ goal, onDeposit, onDelete }: GoalCardProps) {
         className="mb-2"
       />
 
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="flex items-center justify-between text-xs text-[var(--text-secondary)]">
         <span>
           {formatBRL(goal.currentAmount)} de {formatBRL(goal.targetAmount)}
         </span>
@@ -328,19 +336,19 @@ export function GoalsPage() {
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Metas</h1>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Metas</h1>
         <button
           onClick={() => {
             setCreateError(null);
             setShowCreate(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + Nova meta
         </button>
       </div>
 
-      {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
+      {isLoading && <p className="text-[var(--text-secondary)] text-sm">Carregando...</p>}
 
       {!isLoading && goals.length === 0 && (
         <EmptyState icon="🎯" message="Nenhuma meta criada ainda. Que tal começar?" />
@@ -348,7 +356,7 @@ export function GoalsPage() {
 
       {activeGoals.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
             Em andamento
           </h2>
           <div className="space-y-3">
@@ -369,7 +377,7 @@ export function GoalsPage() {
 
       {completedGoals.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wide mb-3">
             Concluídas
           </h2>
           <div className="space-y-3">
@@ -384,7 +392,7 @@ export function GoalsPage() {
         <section>
           <button
             onClick={() => setShowCancelled((v) => !v)}
-            className="text-sm text-gray-400 hover:text-gray-600 font-medium mb-3 flex items-center gap-1"
+            className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium mb-3 flex items-center gap-1"
           >
             {showCancelled ? "▲" : "▼"} Metas canceladas ({cancelledGoals.length})
           </button>
@@ -427,14 +435,14 @@ export function GoalsPage() {
       {deleteTarget && (
         <Modal title="Excluir meta" onClose={() => setDeleteTarget(null)}>
           <div className="space-y-4">
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-[var(--text-primary)]">
               Tem certeza que deseja excluir a meta{" "}
               <strong>&ldquo;{deleteTarget.name}&rdquo;</strong>? Esta ação não pode ser desfeita.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 border border-[var(--border)] text-[var(--text-primary)] text-sm font-medium py-2 rounded-lg hover:bg-[var(--bg-secondary)] transition-colors"
               >
                 Cancelar
               </button>

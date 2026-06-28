@@ -39,17 +39,17 @@ export function MonthYearPicker({ value, onChange }: MonthYearPickerProps) {
     <div className="flex items-center gap-2">
       <button
         onClick={prev}
-        className="p-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm font-medium transition-colors"
+        className="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] text-sm font-medium transition-colors"
         aria-label="Mês anterior"
       >
         ‹
       </button>
-      <span className="text-sm font-semibold text-gray-800 w-36 text-center">
+      <span className="text-sm font-semibold text-[var(--text-primary)] w-36 text-center">
         {MONTH_NAMES[value.month - 1]} {value.year}
       </span>
       <button
         onClick={next}
-        className="p-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm font-medium transition-colors"
+        className="p-1.5 rounded-lg border border-[var(--border)] hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] text-sm font-medium transition-colors"
         aria-label="Próximo mês"
       >
         ›
