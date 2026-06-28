@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: "/accounts", label: "Contas", icon: "🏦" },
   { to: "/categories", label: "Categorias", icon: "🏷️" },
   { to: "/budgets", label: "Orçamento", icon: "📅" },
+  { to: "/goals", label: "Metas", icon: "🎯" },
 ];
 
 export function Sidebar() {
