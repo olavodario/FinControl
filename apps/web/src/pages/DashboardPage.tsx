@@ -222,7 +222,7 @@ export function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="px-6 py-8 max-w-5xl mx-auto">
+      <div className="px-4 py-6 md:px-6 md:py-8 max-w-5xl mx-auto">
         <p className="text-[var(--text-secondary)] text-sm">Carregando...</p>
       </div>
     );
@@ -230,7 +230,7 @@ export function DashboardPage() {
 
   if (!summary || !charts) {
     return (
-      <div className="px-6 py-8 max-w-5xl mx-auto">
+      <div className="px-4 py-6 md:px-6 md:py-8 max-w-5xl mx-auto">
         <p className="text-red-500 text-sm">Erro ao carregar dados do dashboard.</p>
       </div>
     );
@@ -243,7 +243,7 @@ export function DashboardPage() {
   }));
 
   return (
-    <div className="px-6 py-8 max-w-5xl mx-auto">
+    <div className="px-4 py-6 md:px-6 md:py-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Dashboard</h1>
         <div className="flex items-center gap-3">

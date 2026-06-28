@@ -412,19 +412,32 @@ export function TransactionsPage() {
   const totalPages = txData?.pages ?? 1;
 
   return (
-    <div className="px-6 py-8 max-w-5xl mx-auto">
+    <div className="px-4 py-6 md:px-6 md:py-8 max-w-5xl mx-auto pb-24 md:pb-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Transações</h1>
+        {/* Desktop button */}
         <button
           onClick={() => {
             setFormError(null);
             setShowCreate(true);
           }}
-          className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          className="hidden md:block bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
           + Nova transação
         </button>
       </div>
+
+      {/* Mobile FAB */}
+      <button
+        onClick={() => {
+          setFormError(null);
+          setShowCreate(true);
+        }}
+        className="md:hidden fixed bottom-6 right-6 z-10 bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-sm font-medium px-5 py-3 rounded-full shadow-lg transition-colors"
+        aria-label="Nova transação"
+      >
+        + Nova
+      </button>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-5 bg-[var(--bg-secondary)] p-1 rounded-lg w-fit">
@@ -444,7 +457,7 @@ export function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] px-5 py-4 mb-5 flex flex-wrap items-center gap-4">
+      <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border)] px-5 py-4 mb-5 flex flex-col md:flex-row md:flex-wrap md:items-center gap-4">
         <MonthYearPicker
           value={{ month, year }}
           onChange={(v) =>

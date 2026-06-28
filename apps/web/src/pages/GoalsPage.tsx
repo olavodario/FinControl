@@ -334,7 +334,7 @@ export function GoalsPage() {
   const cancelledGoals = goals.filter((g) => g.status === "CANCELLED");
 
   return (
-    <div className="px-6 py-8 max-w-3xl mx-auto">
+    <div className="px-4 py-6 md:px-6 md:py-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Metas</h1>
         <button

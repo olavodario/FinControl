@@ -11,7 +11,12 @@ const NAV_ITEMS = [
   { to: "/goals", label: "Metas", icon: "🎯" },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+export function Sidebar({ open = true, onClose }: SidebarProps) {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
@@ -21,18 +26,30 @@ export function Sidebar() {
     navigate("/login");
   }
 
+  function handleNavClick() {
+    onClose?.();
+  }
+
   return (
-    <aside className="w-56 shrink-0 bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col">
+    <aside
+      className={`
+        fixed inset-y-0 left-0 z-30 w-56 bg-[var(--bg-card)] border-r border-[var(--border)] flex flex-col
+        transition-transform duration-200
+        md:static md:translate-x-0 md:shrink-0
+        ${open ? "translate-x-0" : "-translate-x-full"}
+      `}
+    >
       <div className="px-5 py-5 border-b border-[var(--border)] flex items-center justify-between">
         <span className="text-lg font-bold text-[var(--color-brand)]">FinControl</span>
         <ThemeToggle />
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
+            onClick={handleNavClick}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
