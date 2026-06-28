@@ -6,6 +6,7 @@ import { AccountsPage } from "./pages/AccountsPage.js";
 import { BudgetsPage } from "./pages/BudgetsPage.js";
 import { CategoriesPage } from "./pages/CategoriesPage.js";
 import { DashboardPage } from "./pages/DashboardPage.js";
+import { GoalsPage } from "./pages/GoalsPage.js";
 import { LoginPage } from "./pages/LoginPage.js";
 import { RegisterPage } from "./pages/RegisterPage.js";
 import { TransactionsPage } from "./pages/TransactionsPage.js";
@@ -40,6 +41,7 @@ export function App() {
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/transactions" element={<TransactionsPage />} />
         <Route path="/budgets" element={<BudgetsPage />} />
+        <Route path="/goals" element={<GoalsPage />} />
       </Route>
     </Routes>
   );

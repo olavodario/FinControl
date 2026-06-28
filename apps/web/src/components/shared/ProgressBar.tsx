@@ -1,19 +1,25 @@
 interface ProgressBarProps {
   percentage: number;
   showLabel?: boolean;
+  color?: string;
+  className?: string;
 }
 
-export function ProgressBar({ percentage, showLabel = false }: ProgressBarProps) {
+export function ProgressBar({ percentage, showLabel = false, color, className }: ProgressBarProps) {
   const clamped = Math.min(percentage, 100);
-  const color =
+  const defaultColor =
     percentage > 100 ? "bg-red-500" : percentage >= 80 ? "bg-yellow-400" : "bg-green-500";
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={`flex items-center gap-2 ${className ?? ""}`}>
       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all ${color}`}
-          style={{ width: `${clamped}%` }}
+          className={
+            color
+              ? "h-full rounded-full transition-all"
+              : `h-full rounded-full transition-all ${defaultColor}`
+          }
+          style={{ width: `${clamped}%`, ...(color ? { backgroundColor: color } : {}) }}
         />
       </div>
       {showLabel && (
