@@ -19,6 +19,7 @@ import { CurrencyDisplay } from "../components/shared/CurrencyDisplay.js";
 import { EmptyState } from "../components/shared/EmptyState.js";
 import { MonthYearPicker } from "../components/shared/MonthYearPicker.js";
 import { ProgressBar } from "../components/shared/ProgressBar.js";
+import { SkeletonCard } from "../components/shared/SkeletonCard.js";
 import { getIconEmoji } from "./CategoriesPage.js";
 import * as dashboardService from "../services/dashboard.service.js";
 import * as chartsService from "../services/charts.service.js";
@@ -223,7 +224,16 @@ export function DashboardPage() {
   if (isLoading) {
     return (
       <div className="px-4 py-6 md:px-6 md:py-8 max-w-5xl mx-auto">
-        <p className="text-[var(--text-secondary)] text-sm">Carregando...</p>
+        <div className="h-8 bg-[var(--bg-secondary)] rounded w-32 mb-6 animate-pulse" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SkeletonCard className="h-64" />
+          <SkeletonCard className="h-64" />
+        </div>
       </div>
     );
   }
