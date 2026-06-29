@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import type { GoalStatus } from "@fincontrol/types";
+import type { GoalStatus } from "../types/index.js";
 import type { AuthRequest } from "../middlewares/authenticate.js";
 import {
   createGoalSchema,

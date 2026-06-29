@@ -4,7 +4,7 @@ import type {
   GoalResponseDto,
   GoalStatus,
   UpdateGoalRequestDto,
-} from "@fincontrol/types";
+} from "../types/index.js";
 import { AppError } from "../utils/appError.js";
 import {
   createGoal,

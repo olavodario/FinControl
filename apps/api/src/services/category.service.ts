@@ -2,7 +2,7 @@ import type {
   CategoryResponseDto,
   CreateCategoryRequestDto,
   UpdateCategoryRequestDto,
-} from "@fincontrol/types";
+} from "../types/index.js";
 import { AppError } from "../utils/appError.js";
 import {
   countTransactionsByCategory,

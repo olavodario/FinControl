@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import type { AuthResponseDto, LoginRequestDto, RegisterRequestDto } from "@fincontrol/types";
+import type { AuthResponseDto, LoginRequestDto, RegisterRequestDto } from "../types/index.js";
 import { createUser, findUserByEmail, findUserById } from "../repositories/user.repository.js";
 import {
   invalidateRefreshToken,

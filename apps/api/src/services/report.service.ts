@@ -1,4 +1,4 @@
-import type { MonthlyReportCategoryDto, MonthlyReportDto } from "@fincontrol/types";
+import type { MonthlyReportCategoryDto, MonthlyReportDto } from "../types/index.js";
 import { findCategoriesByIds } from "../repositories/category.repository.js";
 import {
   groupTransactionsByCategoryAndType,

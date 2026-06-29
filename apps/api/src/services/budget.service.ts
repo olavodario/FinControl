@@ -1,4 +1,4 @@
-import type { BudgetResponseDto, CreateBudgetRequestDto } from "@fincontrol/types";
+import type { BudgetResponseDto, CreateBudgetRequestDto } from "../types/index.js";
 import { AppError } from "../utils/appError.js";
 import {
   deleteBudget,

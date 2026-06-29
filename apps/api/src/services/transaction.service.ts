@@ -5,7 +5,7 @@ import type {
   TransactionResponseDto,
   TransactionSummaryDto,
   UpdateTransactionRequestDto,
-} from "@fincontrol/types";
+} from "../types/index.js";
 import { AppError } from "../utils/appError.js";
 import { findAccountById, recalculateAccountBalance } from "../repositories/account.repository.js";
 import { findCategoriesByIds } from "../repositories/category.repository.js";

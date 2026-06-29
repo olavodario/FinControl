@@ -5,7 +5,7 @@ import type {
   DashboardDto,
   MonthProjectionDto,
   ProjectionDto,
-} from "@fincontrol/types";
+} from "../types/index.js";
 import { findCategoriesByIds } from "../repositories/category.repository.js";
 import { findAccountsByUser } from "../repositories/account.repository.js";
 import {
@@ -14,7 +14,7 @@ import {
   sumTransactionsByTypeAndMonth,
 } from "../repositories/transaction.repository.js";
 import type { TransactionWithDetails } from "../repositories/transaction.repository.js";
-import type { TransactionResponseDto } from "@fincontrol/types";
+import type { TransactionResponseDto } from "../types/index.js";
 import {
   findBudgetsByUserAndMonth,
   sumSpentByCategory,
